@@ -1,0 +1,45 @@
+rule Using_CMSTP_to_install_malicious_INF_files {
+  
+  meta:
+    author = "Raven Picadizo, MSS Team"
+    description = "Detects misuse of the built in cmstp tool to execute malicious inf files."
+    severity = "Medium"
+    rule_fidelity = "unknown"
+    mitre_tactic = "Defensive Evasion"
+    mitre_tactic_ID = "TA0005"
+    mitre_technique = "System Binary Proxy Execution: CMSTP"
+    mitre_technique_ID = "T1218.003"
+    testing_standard = "none"
+    reference_ticket = "none"
+    reference_URL = "https://dmcxblue.gitbook.io/red-team-notes-2-0/red-team-techniques/defense-evasion/t1218-signed-binary-proxy-execution/untitled-8"
+
+  events:
+    $e1.target.ip = $internal_ip
+    not net.ip_in_range_cidr($e1.target.ip, "10.0.0.0/8")
+    not net.ip_in_range_cidr($e1.target.ip, "172.16.0.0/12")
+    not net.ip_in_range_cidr($e1.target.ip, "192.168.0.0/16")
+    
+    $e1.metadata.event_type = "PROCESS_LAUNCH"
+    (
+        $e1.metadata.product_event_type = "4648"  //Windows Security Log (Event ID 4648 - a new process has been created)
+        or $e1.metadata.product_event_type = "1"   //Sysmon (Event ID 1 - process create)
+        or $e1.src.file.full_path = /\\Windows\\System32\\cmstp.exe/ nocase 
+    )
+
+    $e1.src.process.command_line  = /.*\.inf$/ nocase //placeholder for correct UDM fields to display .inf execution
+    ///\\*\.inf/
+    $e1.principal.hostname = $hostname    //placeholder for correct UDM fields for display name
+    $e1.principal.user.userid = $username //placeholder for correct UDM fields for identity name
+  
+  outcome:
+    
+    $risk_score = max(
+        60 * 1
+    )
+    // Setting up the responsible entity
+    $responsible_user = array_distinct($username)
+    $responsible_entity = array_distinct($hostname)
+
+  condition:
+    $e1
+}
