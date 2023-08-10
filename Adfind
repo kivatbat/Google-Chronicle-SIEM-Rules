@@ -1,0 +1,38 @@
+rule Identify_remote_systems_with_adfind {
+  
+  meta:
+    author = "Raven Picadizo, MSS Team"
+    description = "Detects the use of the built in adfind Windows utility to investigate remote systems within the network."
+    severity = "Warning"
+    rule_fidelity = "Unknown"
+    mitre_tactic = "TA0007"
+    mitre_technique = "T1018"
+    testing_standard = "none"
+    reference_URL = "https://www.elastic.co/guide/en/security/current/adfind-command-activity.html"
+    reference_ticket = "CONTENT-1502"
+    
+  events:
+    // Looking for process launch events
+    $e1.metadata.event_type >= "PROCESS_UNCATEGORIZED" and $e1.metadata.event_type <= "PROCESS_OPEN"
+
+    
+    $e1.target.process.file.full_path = /C:\\Windows.*(cmd|powershell|bash).*/ nocase
+    ($e1.target.process.command_line  = /adfind.*(\(objectcategory=(computer|person|subnet|group|organizationalunit|attributeschema))/ nocase 
+    or $e1.target.process.command_line  = /adfind.*(domainlist|dcmodes|adinfo|dclist|computers_pwnotreqd|trustdmp)/ nocase)
+
+    // Setting up group variables
+    $hostname = $e1.principal.hostname     
+    $username = $e1.principal.user.userid
+
+  match:
+    $hostname, $username over 10m
+    
+  outcome:
+    $risk_score = max(30 * 1)
+    
+    // Setting up the responsible entity
+    $responsible_user = array_distinct($username)
+
+  condition:
+    $e1
+}
