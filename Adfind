@@ -2,7 +2,7 @@ rule Identify_remote_systems_with_adfind {
   
   meta:
     author = "Raven Picadizo, MSS Team"
-    description = "Detects the use of the built in adfind Windows utility to investigate remote systems within the network."
+    description = "Detects the use of the built-in adfind Windows utility to investigate remote systems within the network."
     severity = "Warning"
     rule_fidelity = "Unknown"
     mitre_tactic = "TA0007"
