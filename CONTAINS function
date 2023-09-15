@@ -1,0 +1,8 @@
+Please test in https://regex101.com/
+
+Regular Expression:
+ powershell.*(?:-enc|-ec|-en)
+
+Test string:
+ powershell.exe anyCharacter -enc
+ powershell.exe anyCharacter -ec anyCharacter -enc
