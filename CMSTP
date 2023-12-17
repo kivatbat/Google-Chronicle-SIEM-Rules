@@ -1,7 +1,7 @@
 rule Using_CMSTP_to_install_malicious_INF_files {
   
   meta:
-    author = "Raven Picadizo, MSS Team"
+    author = "kivatbat"
     description = "Detects misuse of the built in cmstp tool to execute malicious inf files."
     severity = "Medium"
     rule_fidelity = "unknown"
